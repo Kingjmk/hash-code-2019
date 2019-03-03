@@ -1,5 +1,5 @@
 using System;
-//pure brute force edition
+
 namespace ConsoleApp1
 {
 	using System;
@@ -67,7 +67,7 @@ namespace ConsoleApp1
 			string line;
 
 			//Read the file and display it line by line.  
-			System.IO.StreamReader file = new System.IO.StreamReader(@"input.txt");
+			System.IO.StreamReader file = new System.IO.StreamReader(@"F:\mediafolders\Desktop\FastCodes\ConsoleApp1\ConsoleApp1\input.txt");
 			while ((line = file.ReadLine()) != null)
 			{
 				//System.Console.WriteLine(line);  
@@ -179,92 +179,135 @@ namespace ConsoleApp1
 			//}
 
 			//ManualSort
-			List<slide> resultslides = new List<slide>();
-			
-			for (int loop1 = 0; loop1 < 1; loop1++)
+
+			var sr = slides;
+			int limit = 3;
+			for (int j = 0; j < 1500; j++)
 			{
-				List<slide> inputslides = new List<slide>();
-				List<slide> outputSlides = new List<slide>();
-				if (loop1 > 0)
+				Console.WriteLine(j);
+				if (sr.Count * limit < j) limit++;
+				for (int count = 1; count < sr.Count - 1; count++)
 				{
-					inputslides = resultslides;
-					inputslides.Reverse();
-				}
-				else
-				{
-					inputslides = slides.ToList();
-					inputslides.Sort((x, y) => x.tags.ToList().Count.CompareTo(getMatched(x.tags.ToList(), y.tags.ToList())));
+					var sl = sr[count];
+					//Console.WriteLine("/" + getMatched(sl.tags, sr[count + 1].tags) + "-" + getMatched(sl.tags, sr[count - 1].tags));
 
-				}
 
-				outputSlides.Add(inputslides.First());
-				inputslides.Remove(inputslides.First());
-				for (int loop = inputslides.Count; loop > 0; loop--)
-				{
-					var tempSlide = outputSlides.Last();
-					if (tempSlide == null)
+					//replace with best match
+					var bmatches = getMatched(sl.tags, sr[count - 1].tags);
+					var amatches = getMatched(sl.tags, sr[count + 1].tags);
+
+					if (bmatches > limit && amatches > limit)
 					{
 						continue;
 					}
-					Console.WriteLine(loop);
-					var mostid = 0;
-					var mostcommons = 0;
-					bool first = true;
-					foreach (var b in inputslides.ToList())
+
+					if (bmatches - (int)MathF.Round(bmatches / 1.3f) > amatches)
 					{
-						if (b.id == tempSlide.id) continue;
-						if (first)
-						{
-							mostid = b.id;
-							first = false;
-						}
+						//switch
+						var temp = sr[count];
+						sr[count] = sr[count - 1];
+						sr[count - 1] = temp;
 
-						var firstlist = tempSlide.tags.ToList();
-						var secondlist = b.tags.ToList();
-						List<string> commons = firstlist.Intersect(secondlist).ToList();
-						if (commons.Count == firstlist.Count)
-						{
-							mostid = b.id;
-							break;
-						}
-
-						if (commons.Count - firstlist.Count / 2 == mostcommons)
-						{
-							mostid = b.id;
-							mostcommons = commons.Count;
-
-						}
-
-						if (mostcommons == firstlist.Count)
-						{
-							mostid = b.id;
-							break;
-						}
+					}
+					else if (bmatches + (int) MathF.Round(bmatches / 1.3f) < amatches)
+					{
+						var temp = sr[count];
+						sr[count] = sr[count + 1];
+						sr[count + 1] = temp;
+					}
+					else if (bmatches == 0 && amatches == 0)
+					{
+						var temp = sr[count - 1];
+						sr[count -1] = sr[count + 1];
+						sr[count + 1] = temp;
 					}
 
-					outputSlides.Add(slides.Where(x => x.id == mostid).First());
-					inputslides.Remove(slides.Where(x => x.id == mostid).First());
 
 				}
-				resultslides = outputSlides;
-
 			}
 
+			List<slide> resultslides = new List<slide>();
+			
+			//for (int loop1 = 0; loop1 < 1; loop1++)
+			//{
+			//	List<slide> inputslides = new List<slide>();
+			//	List<slide> outputSlides = new List<slide>();
+			//	if (loop1 > 0)
+			//	{
+			//		inputslides = resultslides;
+			//		inputslides.Reverse();
+			//	}
+			//	else
+			//	{
+			//		inputslides = slides.ToList();
+			//		inputslides.Sort((x, y) => x.tags.ToList().Count.CompareTo(getMatched(x.tags.ToList(), y.tags.ToList())));
 
-			//slides.Sort((x, y) => x.tags.ToList().Intersect(y.tags.ToList()).ToList().Count.CompareTo(y.tags.ToList().Count));
-			//slides.Sort((x, y) => x.tags.ToList().Intersect(y.tags.ToList()).ToList().Count.CompareTo(x.tags.ToList().Count));
+			//	}
+
+			//	outputSlides.Add(inputslides.First());
+			//	inputslides.Remove(inputslides.First());
+			//	for (int loop = inputslides.Count; loop > 0; loop--)
+			//	{
+			//		var tempSlide = outputSlides.Last();
+			//		if (tempSlide == null)
+			//		{
+			//			continue;
+			//		}
+			//		Console.WriteLine(loop);
+			//		var mostid = 0;
+			//		var mostcommons = 0;
+			//		bool first = true;
+			//		foreach (var b in inputslides.ToList())
+			//		{
+			//			if (b.id == tempSlide.id) continue;
+			//			if (first)
+			//			{
+			//				mostid = b.id;
+			//				first = false;
+			//			}
+
+			//			var firstlist = tempSlide.tags.ToList();
+			//			var secondlist = b.tags.ToList();
+			//			List<string> commons = firstlist.Intersect(secondlist).ToList();
+			//			if (commons.Count == firstlist.Count)
+			//			{
+			//				mostid = b.id;
+			//				break;
+			//			}
+
+			//			if (commons.Count - firstlist.Count / 2 == mostcommons)
+			//			{
+			//				mostid = b.id;
+			//				mostcommons = commons.Count;
+
+			//			}
+
+			//			if (mostcommons == firstlist.Count)
+			//			{
+			//				mostid = b.id;
+			//				break;
+			//			}
+			//		}
+
+			//		outputSlides.Add(slides.Where(x => x.id == mostid).First());
+			//		inputslides.Remove(slides.Where(x => x.id == mostid).First());
+
+			//	}
+			//	resultslides = outputSlides;
+
+			//}
 
 			Console.WriteLine(photos.Count);
 			Console.WriteLine(resultslides.Where(x => x.H == true).ToList().Count);
 			Console.WriteLine(resultslides.Where(x => x.H == false).ToList().Count);
-			Printoutput(resultslides);
+			Printoutput(sr.ToList());
 
 		}
 
 		public static void Printoutput(List<slide> list)
 		{
 			using (System.IO.StreamWriter myfile =
-			new System.IO.StreamWriter(@"output.txt", true))
+			new System.IO.StreamWriter(@"F:\mediafolders\Desktop\FastCodes\ConsoleApp1\ConsoleApp1\output.txt", true))
 			{
 				StringBuilder sb = new StringBuilder("");
 				sb.AppendFormat("{0}\n", list.Count);
